@@ -1,0 +1,16 @@
+{
+ "title": "Свинка",
+ "timezone": "Europe/Moscow",
+ "components": [
+  {
+   "id": "site",
+   "name": "Сайт",
+   "description": "svinka.uk"
+  },
+  {
+   "id": "remote",
+   "name": "Удалённый доступ",
+   "description": "Туннель Cloudflare к серверу"
+  }
+ ]
+}
