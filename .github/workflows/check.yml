@@ -1,0 +1,45 @@
+name: check
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check out the data branch
+        run: |
+          git fetch --depth=1 origin data
+          git worktree add data-wt origin/data -B data
+
+      - name: Run checks
+        run: node scripts/check.mjs data-wt
+
+      - name: Save results
+        working-directory: data-wt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "check $(date -u +%Y-%m-%dT%H:%MZ)" || exit 0
+          for attempt in 1 2 3; do
+            git push -q origin data && exit 0
+            git pull -q --rebase origin data
+          done
+          exit 1

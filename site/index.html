@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Свинка — статус</title>
+<meta name="description" content="Доступность сервисов Свинки: текущее состояние, аптайм за 90 дней и история сбоев.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%233ba55d'/><path d='M19 33l9 9 17-19' stroke='white' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --muted: #6a737d;
+    --border: #e1e4e8;
+    --up: #3ba55d;
+    --up-soft: #e8f6ed;
+    --warn: #e8a317;
+    --down: #e5484d;
+    --down-soft: #fdecec;
+    --nodata: #d5d9de;
+    --tip-bg: #1f2328;
+    --tip-text: #ffffff;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111316;
+      --surface: #1a1d21;
+      --text: #e8eaed;
+      --muted: #9aa1a9;
+      --border: #2c3036;
+      --up: #43b76a;
+      --up-soft: #16301f;
+      --warn: #f0b429;
+      --down: #f0585d;
+      --down-soft: #3a1c1e;
+      --nodata: #3a3f46;
+      --tip-bg: #e8eaed;
+      --tip-text: #111316;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111316;
+    --surface: #1a1d21;
+    --text: #e8eaed;
+    --muted: #9aa1a9;
+    --border: #2c3036;
+    --up: #43b76a;
+    --up-soft: #16301f;
+    --warn: #f0b429;
+    --down: #f0585d;
+    --down-soft: #3a1c1e;
+    --nodata: #3a3f46;
+    --tip-bg: #e8eaed;
+    --tip-text: #111316;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 32px 48px;
+    display: grid;
+    gap: 28px;
+  }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; letter-spacing: -0.01em; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--surface); border: 1px solid var(--border); font-size: 20px;
+  }
+  .brand small { font-weight: 500; color: var(--muted); font-size: 15px; }
+  .updated { color: var(--muted); font-size: 13px; }
+
+  .banner {
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-weight: 600;
+    font-size: 18px;
+    color: #fff;
+    background: var(--up);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .banner.down { background: var(--down); }
+  .banner.unknown { background: var(--nodata); color: var(--text); }
+  .banner svg { flex: none; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .component { padding: 18px 20px; display: grid; gap: 12px; }
+  .component + .component { border-top: 1px solid var(--border); }
+  .component-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .component-name { font-weight: 600; }
+  .component-desc { color: var(--muted); font-size: 13px; margin-left: 6px; font-weight: 400; }
+  .state { font-size: 14px; font-weight: 600; color: var(--up); }
+  .state.down { color: var(--down); }
+  .state.unknown { color: var(--muted); }
+
+  .bars { display: flex; gap: 2px; height: 34px; }
+  .bar {
+    flex: 1 1 0; min-width: 0; border-radius: 2px; background: var(--nodata);
+    border: 0; padding: 0; cursor: pointer;
+  }
+  .bar.up { background: var(--up); }
+  .bar.warn { background: var(--warn); }
+  .bar.down { background: var(--down); }
+  .bar:hover, .bar:focus-visible { opacity: .7; outline: none; }
+  @media (max-width: 900px) { .bars .bar:nth-child(-n+30) { display: none; } }
+  @media (max-width: 600px) { .bars .bar:nth-child(-n+60) { display: none; } }
+
+  .scale { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+  .scale .rule { flex: 1; height: 1px; background: var(--border); }
+  .range-90, .range-60, .range-30 { display: none; }
+  .range-90 { display: inline; }
+  @media (max-width: 900px) { .range-90 { display: none; } .range-60 { display: inline; } }
+  @media (max-width: 600px) { .range-60 { display: none; } .range-30 { display: inline; } }
+
+  h2 { font-size: 18px; margin: 0 0 4px; text-wrap: balance; }
+  .incidents { display: grid; gap: 22px; }
+  .day h3 {
+    font-size: 15px; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .incident { display: grid; gap: 2px; padding: 4px 0 10px; }
+  .incident-title { font-weight: 600; }
+  .incident-title.open { color: var(--down); }
+  .incident-meta { color: var(--muted); font-size: 13px; }
+  .empty { color: var(--muted); }
+
+  footer { color: var(--muted); font-size: 13px; display: flex; gap: 8px 16px; flex-wrap: wrap; justify-content: space-between; }
+  footer a { color: inherit; }
+
+  .tip {
+    position: fixed; z-index: 10; pointer-events: none;
+    background: var(--tip-bg); color: var(--tip-text);
+    border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.45;
+    max-width: 240px; box-shadow: 0 6px 24px rgba(0,0,0,.18);
+  }
+  .tip strong { display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">🐷</span><span id="title">Свинка</span> <small>статус</small></div>
+    <div class="updated" id="updated">Загрузка…</div>
+  </header>
+
+  <div class="banner unknown" id="banner" role="status">Загружаем данные…</div>
+
+  <section class="card" id="components" aria-label="Компоненты"></section>
+
+  <section>
+    <h2>Последние сбои</h2>
+    <div class="incidents" id="incidents"><p class="empty">Загрузка…</p></div>
+  </section>
+
+  <footer>
+    <span>Проверка каждые 5 минут извне, через GitHub Actions. Время московское.</span>
+    <a href="https://github.com/leva38363-code/svinka-status" rel="noopener">Исходный код</a>
+  </footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA = "https://raw.githubusercontent.com/leva38363-code/svinka-status/data/";
+const DAYS = 90;
+const STALE_MIN = 20;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+let tz = "Europe/Moscow";
+const dayKey = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(d);
+const fmtDay = (key) => new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+  .format(new Date(key + "T00:00:00Z"));
+const fmtTime = (iso) => new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: tz }).format(new Date(iso));
+
+function fmtDuration(ms) {
+  const min = Math.max(1, Math.round(ms / 60000));
+  if (min < 60) return `${min} мин`;
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h < 24) return m ? `${h} ч ${m} мин` : `${h} ч`;
+  const d = Math.floor(h / 24), hh = h % 24;
+  return hh ? `${d} дн ${hh} ч` : `${d} дн`;
+}
+
+function ago(iso) {
+  const min = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (min < 1) return "только что";
+  if (min < 60) return `${min} мин назад`;
+  return `${fmtDuration(min * 60000)} назад`;
+}
+
+function cause(i) {
+  if (i.error === "timeout") return "сервер не ответил за 15 секунд";
+  if (i.error) return "нет соединения";
+  if (i.status === 530) return "туннель не подключён к серверу (HTTP 530)";
+  return `ответ HTTP ${i.status}`;
+}
+
+function lastDays() {
+  const keys = [];
+  const now = Date.now();
+  for (let i = DAYS - 1; i >= 0; i--) keys.push(dayKey(new Date(now - i * 86400000)));
+  return [...new Set(keys)].slice(-DAYS);
+}
+
+function uptimeClass(day) {
+  if (!day || !day.checks) return "";
+  const u = day.ok / day.checks;
+  if (u >= 0.995) return "up";
+  if (u >= 0.95) return "warn";
+  return "down";
+}
+
+function pct(ok, checks) {
+  if (!checks) return "нет данных";
+  const v = (ok / checks) * 100;
+  return (v === 100 ? "100" : v.toFixed(2)) + "%";
+}
+
+function render(config, status, days, incidents) {
+  tz = config.timezone || tz;
+  $("title").textContent = config.title || "Статус";
+  const names = Object.fromEntries(config.components.map((c) => [c.id, c.name]));
+  const keys = lastDays();
+
+  const down = config.components.filter((c) => status.components[c.id] && !status.components[c.id].ok);
+  const banner = $("banner");
+  if (down.length === 0) {
+    banner.className = "banner";
+    banner.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(255,255,255,.25)"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Все системы работают`;
+  } else {
+    banner.className = "banner down";
+    banner.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(255,255,255,.25)"/><path d="M12 7v6M12 16.5v.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>` +
+      esc(down.length === 1 ? `Не работает: ${down[0].name}` : `Не работают: ${down.map((c) => c.name).join(", ")}`);
+  }
+
+  $("components").innerHTML = config.components.map((c) => {
+    const s = status.components[c.id];
+    const perDay = days[c.id] || {};
+    let ok = 0, checks = 0;
+    for (const k of keys) if (perDay[k]) { ok += perDay[k].ok; checks += perDay[k].checks; }
+    const sum = (n) => { let o = 0, t = 0; for (const k of keys.slice(-n)) if (perDay[k]) { o += perDay[k].ok; t += perDay[k].checks; } return pct(o, t); };
+    const state = !s ? ["unknown", "Нет данных"] : s.ok ? ["", "Работает"] : ["down", "Не работает"];
+    const bars = keys.map((k) => `<button class="bar ${uptimeClass(perDay[k])}" data-c="${esc(c.id)}" data-d="${k}" aria-label="${esc(fmtDay(k))}"></button>`).join("");
+    return `<div class="component">
+      <div class="component-head">
+        <div class="component-name">${esc(c.name)}<span class="component-desc">${esc(c.description || "")}</span></div>
+        <div class="state ${state[0]}">${state[1]}</div>
+      </div>
+      <div class="bars">${bars}</div>
+      <div class="scale">
+        <span><span class="range-90">90 дней назад</span><span class="range-60">60 дней назад</span><span class="range-30">30 дней назад</span></span>
+        <span class="rule"></span>
+        <span><span class="range-90">аптайм ${sum(90)}</span><span class="range-60">аптайм ${sum(60)}</span><span class="range-30">аптайм ${sum(30)}</span></span>
+        <span class="rule"></span>
+        <span>сегодня</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  const tip = $("tip");
+  const show = (el) => {
+    const day = (days[el.dataset.c] || {})[el.dataset.d];
+    let body;
+    if (!day || !day.checks) body = "Нет данных";
+    else {
+      const missed = day.checks - day.ok;
+      const avg = day.ok ? Math.round(day.totalMs / day.ok) + " мс" : "—";
+      body = `Аптайм ${pct(day.ok, day.checks)}<br>` +
+        (missed ? `Сбои: около ${fmtDuration(missed * 5 * 60000)}` : "Без сбоев") +
+        `<br>Средний ответ: ${avg}`;
+    }
+    tip.innerHTML = `<strong>${esc(fmtDay(el.dataset.d))}</strong>${body}`;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+    const top = r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8;
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+  };
+  for (const el of document.querySelectorAll(".bar")) {
+    el.addEventListener("mouseenter", () => show(el));
+    el.addEventListener("focus", () => show(el));
+    el.addEventListener("click", () => show(el));
+    el.addEventListener("mouseleave", () => (tip.hidden = true));
+    el.addEventListener("blur", () => (tip.hidden = true));
+  }
+
+  const list = incidents.slice(0, 15);
+  if (!list.length) {
+    $("incidents").innerHTML = `<p class="empty">Сбоев не было.</p>`;
+  } else {
+    const groups = new Map();
+    for (const i of list) {
+      const k = dayKey(new Date(i.start));
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(i);
+    }
+    $("incidents").innerHTML = [...groups].map(([k, items]) => `<div class="day"><h3>${esc(fmtDay(k))}</h3>` +
+      items.map((i) => {
+        const name = names[i.component] || i.component;
+        const open = !i.end;
+        const span = open
+          ? `с ${fmtTime(i.start)}, уже ${fmtDuration(Date.now() - new Date(i.start))}`
+          : `${fmtTime(i.start)}–${fmtTime(i.end)}, ${fmtDuration(new Date(i.end) - new Date(i.start))}`;
+        return `<div class="incident">
+          <div class="incident-title ${open ? "open" : ""}">${esc(name)}: ${open ? "сбой продолжается" : "сбой устранён"}</div>
+          <div class="incident-meta">${esc(span)} · ${esc(cause(i))}</div>
+        </div>`;
+      }).join("") + `</div>`).join("");
+  }
+
+  const stale = (Date.now() - new Date(status.updated)) / 60000 > STALE_MIN;
+  $("updated").textContent = status.updated
+    ? `Обновлено ${ago(status.updated)}${stale ? " · проверки задерживаются" : ""}`
+    : "";
+}
+
+async function load() {
+  const bust = "?t=" + Math.floor(Date.now() / 60000);
+  const get = (f) => fetch(DATA + f + bust, { cache: "no-store" }).then((r) => {
+    if (!r.ok) throw new Error(f + ": " + r.status);
+    return r.json();
+  });
+  try {
+    const [config, status, days, incidents] = await Promise.all([
+      get("config.json"), get("status.json"), get("days.json"), get("incidents.json"),
+    ]);
+    render(config, status, days, incidents);
+  } catch (e) {
+    const banner = $("banner");
+    banner.className = "banner unknown";
+    banner.textContent = "Не удалось загрузить данные проверок. Попробуйте обновить страницу.";
+    $("updated").textContent = "";
+  }
+}
+
+load();
+setInterval(load, 60000);
+document.addEventListener("scroll", () => ($("tip").hidden = true), { passive: true });
+</script>
+</body>
+</html>
