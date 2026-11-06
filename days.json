@@ -1,16 +1,16 @@
 {
  "site": {
   "2026-11-06": {
-   "checks": 1,
-   "ok": 1,
-   "totalMs": 723
+   "checks": 2,
+   "ok": 2,
+   "totalMs": 1240
   }
  },
  "remote": {
   "2026-11-06": {
-   "checks": 1,
-   "ok": 0,
-   "totalMs": 0
+   "checks": 2,
+   "ok": 1,
+   "totalMs": 143
   }
  }
 }
