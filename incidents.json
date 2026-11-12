@@ -1,5 +1,12 @@
 [
  {
+  "component": "site",
+  "start": "2026-11-12T22:36:47.770Z",
+  "end": null,
+  "status": 0,
+  "error": "timeout"
+ },
+ {
   "component": "remote",
   "start": "2026-11-06T15:04:06.326Z",
   "end": "2026-11-06T15:04:49.880Z",
