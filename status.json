@@ -1,19 +1,19 @@
 {
  "components": {
   "site": {
-   "ok": false,
-   "status": 0,
-   "error": "timeout",
-   "ms": 15001,
-   "since": "2026-11-20T02:38:54.758Z"
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "ms": 605,
+   "since": "2026-11-21T15:36:17.395Z"
   },
   "remote": {
    "ok": true,
    "status": 403,
    "error": null,
-   "ms": 94,
+   "ms": 103,
    "since": "2026-11-06T15:04:49.880Z"
   }
  },
- "updated": "2026-11-21T07:33:43.318Z"
+ "updated": "2026-11-21T15:36:17.395Z"
 }
