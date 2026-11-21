@@ -76,7 +76,7 @@
    "totalMs": 865
   },
   "2026-11-21": {
-   "checks": 1,
+   "checks": 2,
    "ok": 0,
    "totalMs": 0
   }
@@ -158,9 +158,9 @@
    "totalMs": 638
   },
   "2026-11-21": {
-   "checks": 1,
-   "ok": 1,
-   "totalMs": 124
+   "checks": 2,
+   "ok": 2,
+   "totalMs": 218
   }
  }
 }
