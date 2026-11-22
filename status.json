@@ -4,16 +4,16 @@
    "ok": true,
    "status": 200,
    "error": null,
-   "ms": 875,
+   "ms": 604,
    "since": "2026-11-21T15:36:17.395Z"
   },
   "remote": {
    "ok": true,
    "status": 403,
    "error": null,
-   "ms": 114,
+   "ms": 103,
    "since": "2026-11-06T15:04:49.880Z"
   }
  },
- "updated": "2026-11-22T08:27:55.996Z"
+ "updated": "2026-11-22T16:36:15.496Z"
 }
