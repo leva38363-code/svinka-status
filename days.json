@@ -111,9 +111,9 @@
    "totalMs": 1983
   },
   "2026-11-28": {
-   "checks": 1,
-   "ok": 1,
-   "totalMs": 497
+   "checks": 2,
+   "ok": 2,
+   "totalMs": 995
   }
  },
  "remote": {
@@ -228,9 +228,9 @@
    "totalMs": 372
   },
   "2026-11-28": {
-   "checks": 1,
-   "ok": 1,
-   "totalMs": 77
+   "checks": 2,
+   "ok": 2,
+   "totalMs": 158
   }
  }
 }
